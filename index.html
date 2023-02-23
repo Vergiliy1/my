@@ -15,17 +15,17 @@
         #game-board {
             display: flex;
             flex-wrap: wrap;
-            width: 400px;
-            height: 400px;
+            width: 40vw;
+            height: 40vw;
             margin: 20px auto;
             background-color: #fff;
-            border: 1px solid #999;
+            border: 1px solid #1f1d1d;
         }
 
         .cell {
             box-sizing: border-box;
-            width: 10%;
-            height: 10%;
+            width: calc(40vw / 10);
+            height: calc(40vw / 10);
             border: 1px solid #999;
             background-color: #eee;
         }
@@ -41,6 +41,78 @@
         #score {
             text-align: center;
             margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        button {
+            font-size: 2em;
+            width: 6em;
+            height: 6em;
+        }
+
+        #game-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-controls-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 45vh;
+            display: none;
+        }
+
+        #up-btn,
+        #down-btn {
+            margin: 4px 0;
+
+        }
+
+        @media (orientation: portrait) and (max-width: 990px) {
+            #game-board {
+                width: 90vw;
+                height: 90vw;
+            }
+
+            .cell {
+                width: calc(90vw / 10);
+                height: calc(90vw / 10);
+            }
+
+            #game-controls-wrapper {
+                display: flex;
+            }
+        }
+
+        @media (orientation: portrait) and (max-width: 770px) {
+            #game-board {
+                width: 70vw;
+                height: 70vw;
+            }
+
+            .cell {
+                width: calc(70vw / 10);
+                height: calc(70vw / 10);
+            }
+
+            #game-controls-wrapper {
+                display: flex;
+            }
+
+            button {
+                font-size: 2em;
+                width: 3em;
+                height: 3em;
+            }
+
+            #score {
+                text-align: center;
+                margin-top: 20px;
+                font-size: 1.5em;
+            }
         }
     </style>
 
@@ -48,8 +120,30 @@
 
 <body>
     <div id="score">Score: 0</div>
+    <!--<div id="resolution"></div>-->
     <div id="game-board"></div>
+    <div id="game-controls-wrapper">
+        <div id="game-controls">
+            <button id="up-btn">&#x2191;</button>
+            <div>
+                <button id="left-btn">&#x2190;</button>
+                <button id="centr-btn">•</button>
+                <button id="right-btn">&#x2192;</button>
+            </div>
+            <button id="down-btn">&#x2193;</button>
+        </div>
+    </div>
+
+
+
+
     <script>
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+        const screenInfo = document.createElement('p');
+
+        document.body.appendChild(screenInfo);
+
         const board = document.getElementById("game-board");
         for (let i = 0; i < 100; i++) {
             const cell = document.createElement("div");
@@ -79,7 +173,62 @@
             }
         });
 
+        // Обработчик события touchstart
+        board.addEventListener("touchstart", event => {
+            const touch = event.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+        });
+
+        // Обработчик события touchmove
+        board.addEventListener("touchmove", event => {
+            const touch = event.touches[0];
+            const deltaX = touch.clientX - startX;
+            const deltaY = touch.clientY - startY;
+            if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0 && direction !== "left") {
+                direction = "right";
+            } else if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX < 0 && direction !== "right") {
+                direction = "left";
+            } else if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY < 0 && direction !== "down") {
+                direction = "up";
+            } else if (Math.abs(deltaY) > Math.abs(deltaX) && deltaY > 0 && direction !== "up") {
+                direction = "down";
+            }
+        });
+
+        // Обработчик события touchend
+        board.addEventListener("touchend", event => {
+            event.preventDefault();
+        });
+
+        document.getElementById("up-btn").addEventListener("click", () => {
+            if (direction !== "down") {
+                direction = "up";
+            }
+        });
+
+        document.getElementById("left-btn").addEventListener("click", () => {
+            if (direction !== "right") {
+                direction = "left";
+            }
+        });
+
+        document.getElementById("right-btn").addEventListener("click", () => {
+            if (direction !== "left") {
+                direction = "right";
+            }
+        });
+
+        document.getElementById("down-btn").addEventListener("click", () => {
+            if (direction !== "up") {
+                direction = "down";
+            }
+        });
+
         function moveSnake() {
+            //resolution.textContent = "Разрешение экрана: " + window.innerWidth + " x " + window.innerHeight;
+
+
             const headIndex = snake[0];
             let newIndex;
 
